@@ -1,0 +1,44 @@
+import React, { useState, useRef } from 'react';
+import './App.css';
+
+const App = () => {
+    const [content, setContent] = useState(
+        'Select some text in this paragraph and click the button to wrap it in a span with a highlight.'
+    );
+    const contentEditableRef = useRef(null);
+
+    const wrapSelectedText = () => {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+
+        const range = selection.getRangeAt(0);
+        const selectedText = selection.toString();
+
+        if (!selectedText) return;
+
+        const span = document.createElement('span');
+        span.className = 'highlight';
+        span.textContent = selectedText;
+        span.style.userSelect = 'none'; // Add the user-select style
+
+        range.deleteContents();
+        range.insertNode(span);
+
+        setContent(contentEditableRef.current.innerHTML);
+        selection.removeAllRanges();
+    };
+
+    return (
+        <div className="App">
+            <div
+                className="content"
+                contentEditable
+                ref={contentEditableRef}
+                dangerouslySetInnerHTML={{ __html: content }}
+            />
+            <button onClick={wrapSelectedText}>Wrap Selected Text</button>
+        </div>
+    );
+};
+
+export default App;
