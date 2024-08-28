@@ -1,0 +1,45 @@
+import { useState, useEffect } from 'react';
+
+const useUserInfo = (userInfoEndpoint) => {
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        // Récupération de l'access token depuis le localStorage
+        const accessToken = localStorage.getItem('access_token');
+
+        if (!accessToken) {
+          throw new Error('Access token is missing');
+        }
+
+        // Envoi de la requête à l'endpoint UserInfo
+        const response = await fetch(userInfoEndpoint, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user info');
+        }
+
+        const data = await response.json();
+        setUserInfo(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserInfo();
+  }, [userInfoEndpoint]);
+
+  return { userInfo, loading, error };
+};
+
+export default useUserInfo;
